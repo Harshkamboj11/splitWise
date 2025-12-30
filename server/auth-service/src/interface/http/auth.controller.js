@@ -1,0 +1,104 @@
+import express from 'express';
+import pool from '../../infrastructure/database/db.connection.js';
+
+const handleSignUp = async (req, res) => {
+  const { name, email, password } = req.body;
+
+  try {
+    if (!name) {
+      return res.status(400).json({
+        success: false,
+        error: 'name is required',
+      });
+    }
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: 'email is required',
+      });
+    }
+
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        error: 'password is required',
+      });
+    }
+
+    // if (password.length() < 8) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     error: 'Password must be of atleast 8 characters',
+    //   });
+    // }
+
+    const user = await pool.query(
+      `INSERT INTO auth.users (name, email, password)
+          VALUES ($1, $2, $3)
+          RETURNING *`,
+      [name, email, password]
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'User create successfully',
+      user: user.rows[0],
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: error.message,
+      message: 'error in handling signup',
+    });
+  }
+};
+
+const handleLogin = async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email) {
+    res.status(400).json({
+      success: false,
+      error: 'email is required',
+    });
+  }
+
+  if (!password) {
+    res.status(400).json({
+      success: false,
+      error: 'password is required',
+    });
+  }
+
+  try {
+    const user = await pool.query(`SELECT email, password from auth.users`);
+    console.log('User logged in successfully', user);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not Found, Please signup again',
+      });
+    }
+
+    if (user.rows[0].email === email && user.rows[0].password) {
+      return res.status(201).json({
+        success: true,
+        message: 'Login successfull',
+      });
+    }
+
+    return res.status(422).json({
+      success: false,
+      message: 'Fill all the credientials carefully',
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Error in handling login',
+      error: error.message,
+    });
+  }
+};
+
+export { handleSignUp, handleLogin };
