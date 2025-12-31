@@ -1,6 +1,12 @@
 import express from 'express';
 import pool from '../../infrastructure/database/db.connection.js';
+import {
+  encryptPass,
+  decryptPass,
+} from '../../infrastructure/security/password.hasher.js';
+import generateToken from '../../infrastructure/security/token.provider.js';
 
+//Handle the signup
 const handleSignUp = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -32,11 +38,13 @@ const handleSignUp = async (req, res) => {
     //   });
     // }
 
+    const hashPass = await encryptPass(password);
+
     const user = await pool.query(
       `INSERT INTO auth.users (name, email, password)
           VALUES ($1, $2, $3)
           RETURNING *`,
-      [name, email, password]
+      [name, email, hashPass]
     );
 
     res.status(201).json({
@@ -53,6 +61,7 @@ const handleSignUp = async (req, res) => {
   }
 };
 
+//Handle the login
 const handleLogin = async (req, res) => {
   const { email, password } = req.body;
 
@@ -71,7 +80,10 @@ const handleLogin = async (req, res) => {
   }
 
   try {
-    const user = await pool.query(`SELECT email, password from auth.users`);
+    const user = await pool.query(
+      `SELECT email, password from auth.users where email = $1`,
+      [email]
+    );
     console.log('User logged in successfully', user);
 
     if (!user) {
@@ -81,10 +93,23 @@ const handleLogin = async (req, res) => {
       });
     }
 
-    if (user.rows[0].email === email && user.rows[0].password) {
+    //token generation
+    const payload = user.id;
+    const token = await generateToken({ payload });
+
+    //token storing in cookies
+    res.cookie('access_token', token, {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    console.log('Token stored in cookie')
+    const comparePass = await decryptPass(password, user.rows[0].password);
+    if (user.rows[0].email === email && comparePass) {
       return res.status(201).json({
         success: true,
         message: 'Login successfull',
+        token: token,
       });
     }
 
