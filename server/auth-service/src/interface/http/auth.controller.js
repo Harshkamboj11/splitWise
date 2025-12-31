@@ -86,7 +86,7 @@ const handleLogin = async (req, res) => {
     );
     console.log('User logged in successfully', user);
 
-    if (!user) {
+    if (user.rows.length === 0) {
       return res.status(404).json({
         success: false,
         message: 'User not Found, Please signup again',
