@@ -1,4 +1,3 @@
-import express from 'express';
 import pool from '../../infrastructure/database/db.connection.js';
 import {
   encryptPass,
@@ -103,7 +102,7 @@ const handleLogin = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    console.log('Token stored in cookie')
+    console.log('Token stored in cookie');
     const comparePass = await decryptPass(password, user.rows[0].password);
     if (user.rows[0].email === email && comparePass) {
       return res.status(201).json({
@@ -125,5 +124,6 @@ const handleLogin = async (req, res) => {
     });
   }
 };
+
 
 export { handleSignUp, handleLogin };
