@@ -9,7 +9,7 @@ const pool = new Pool({
 });
 
 pool.on('connect', () => {
-    console.log('Postgres is successfull connected')
-})
+  console.log('Postgres is successfully connected');
+});
 
 export default pool;
