@@ -13,7 +13,10 @@ const verifyUser = async (req, res, next) => {
     }
 
     const decoded = await jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    req.user = {
+      userId: decoded.id,
+      email: decoded.email
+    };
     next();
   } catch (error) {
     res.status(401).json({
