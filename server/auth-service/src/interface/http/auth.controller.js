@@ -48,7 +48,7 @@ const handleSignUp = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'User create successfully',
+      message: 'User created successfully',
       user: user.rows[0],
     });
   } catch (error) {
@@ -80,7 +80,7 @@ const handleLogin = async (req, res) => {
 
   try {
     const user = await pool.query(
-      `SELECT email, password from auth.users where email = $1`,
+      `SELECT id, email, password from auth.users where email = $1`,
       [email]
     );
     console.log('User logged in successfully', user);
@@ -93,8 +93,9 @@ const handleLogin = async (req, res) => {
     }
 
     //token generation
-    const payload = user.id;
-    const token = await generateToken({ payload });
+    const userId = user.rows[0].id;
+    const payload = { userId, email };
+    const token = await generateToken(payload);
 
     //token storing in cookies
     res.cookie('access_token', token, {
@@ -105,7 +106,7 @@ const handleLogin = async (req, res) => {
     console.log('Token stored in cookie');
     const comparePass = await decryptPass(password, user.rows[0].password);
     if (user.rows[0].email === email && comparePass) {
-      return res.status(201).json({
+      return res.status(200).json({
         success: true,
         message: 'Login successfull',
         token: token,
@@ -124,6 +125,5 @@ const handleLogin = async (req, res) => {
     });
   }
 };
-
 
 export { handleSignUp, handleLogin };
