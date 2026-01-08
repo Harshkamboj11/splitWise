@@ -1,6 +1,7 @@
 //modules
 import express from 'express';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 
 const app = express();
 
@@ -14,9 +15,15 @@ import './src/infrastructure/security/google.passport.js';
 app.use(express.json());
 app.use(cookieParser());
 app.use(passport.initialize());
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+  })
+);
 
 //routes
-app.use('/api', route)
-app.use('/api/auth', route)
+app.use('/api', route);
+app.use('/api/auth', route);
 
 export default app;
