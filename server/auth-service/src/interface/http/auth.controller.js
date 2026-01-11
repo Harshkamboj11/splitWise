@@ -4,6 +4,7 @@ import {
   decryptPass,
 } from '../../infrastructure/security/password.hasher.js';
 import generateToken from '../../infrastructure/security/token.provider.js';
+import sendConfirmationEmail from '../../utils/notification.client.js';
 
 //Handle the signup
 const handleSignUp = async (req, res) => {
@@ -37,6 +38,19 @@ const handleSignUp = async (req, res) => {
     //   });
     // }
 
+    const userExist = await pool.query(
+      `SELECT * FROM auth.users WHERE email = $1`,
+      [email]
+    );
+
+    if (userExist.rows.length > 0) {
+      return res.status(409).json({
+        success: false,
+        message: 'User already exists',
+      });
+    }
+    console.log(userExist)
+
     const hashPass = await encryptPass(password);
 
     const user = await pool.query(
@@ -46,9 +60,17 @@ const handleSignUp = async (req, res) => {
       [name, email, hashPass]
     );
 
+    console.log('Started sending email')
+    
+    await sendConfirmationEmail({
+      email: user.rows[0].email,
+      name: user.rows[0].name
+    })
+
+    console.log('email sent')
     res.status(201).json({
       success: true,
-      message: 'User created successfully',
+      message: 'User signUp Successfully',
       user: user.rows[0],
     });
   } catch (error) {
