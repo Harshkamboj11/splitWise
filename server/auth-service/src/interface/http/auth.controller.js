@@ -49,7 +49,6 @@ const handleSignUp = async (req, res) => {
         message: 'User already exists',
       });
     }
-    console.log(userExist)
 
     const hashPass = await encryptPass(password);
 
@@ -60,9 +59,13 @@ const handleSignUp = async (req, res) => {
       [name, email, hashPass]
     );
 
+    console.log(user)
+
     console.log('Started sending email')
-    
-    await sendConfirmationEmail({
+    console.log(user.rows[0].name)
+    console.log(user.rows[0].email)
+
+    sendConfirmationEmail({
       email: user.rows[0].email,
       name: user.rows[0].name
     })
