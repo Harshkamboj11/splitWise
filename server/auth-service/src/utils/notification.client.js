@@ -4,7 +4,7 @@ import 'dotenv/config';
 const sendConfirmationEmail = async ({ email, name }) => {
   try {
     await axios.post(
-      `${process.env.NOTIFICATION_BASE_URL}/send-welcome-user`,
+      `${process.env.NOTIFICATION_BASE_URL}/send-mail`,
       {
         event: 'USER_SIGNUP',
         to: email,
