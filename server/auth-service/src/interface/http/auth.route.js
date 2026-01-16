@@ -1,13 +1,15 @@
 import express from 'express';
 import passport from 'passport';
-import generateToken from '../../infrastructure/security/token.provider.js';
 
 const router = express.Router();
 
-import { handleLogin, handleSignUp } from './auth.controller.js';
+import { handleLogin, handleSignUp, checkUser } from './auth.controller.js';
+import generateToken from '../../infrastructure/security/token.provider.js';
+import verifyUser from '../middleware/auth.middleware.js';
 
 router.post('/user/signup', handleSignUp);
 router.post('/user/login', handleLogin);
+router.get('/user/me', verifyUser, checkUser)
 
 router.get(
   '/google',

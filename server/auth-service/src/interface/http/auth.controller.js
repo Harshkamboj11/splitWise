@@ -59,18 +59,18 @@ const handleSignUp = async (req, res) => {
       [name, email, hashPass]
     );
 
-    console.log(user)
+    console.log(user);
 
-    console.log('Started sending email')
-    console.log(user.rows[0].name)
-    console.log(user.rows[0].email)
+    console.log('Started sending email');
+    console.log(user.rows[0].name);
+    console.log(user.rows[0].email);
 
     sendConfirmationEmail({
       email: user.rows[0].email,
-      name: user.rows[0].name
-    })
+      name: user.rows[0].name,
+    });
 
-    console.log('email sent')
+    console.log('email sent');
     res.status(201).json({
       success: true,
       message: 'User signUp Successfully',
@@ -141,6 +141,7 @@ const handleLogin = async (req, res) => {
     return res.status(422).json({
       success: false,
       message: 'Fill all the credientials carefully',
+      user: user.rows[0]
     });
   } catch (error) {
     return res.status(500).json({
@@ -151,4 +152,41 @@ const handleLogin = async (req, res) => {
   }
 };
 
-export { handleSignUp, handleLogin };
+const checkUser = async (req, res) => {
+  const id = req.user.userId;
+  console.log(id);
+
+  if (!id) {
+    return res.status(401).json({
+      success: false,
+      message: 'user not logged in',
+    });
+  }
+
+  try {
+    const user = await pool.query(`SELECT * FROM auth.users WHERE id = $1`, [
+      id,
+    ]);
+
+    if (user.rows.length === 0) {
+      return res.status(401).json({
+        success: false,
+        message: 'user not exist',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'user found',
+      user: user.rows[0]
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'something went wrong in authenticating user',
+      error: error.message,
+    });
+  }
+};
+
+export { handleSignUp, handleLogin, checkUser };
