@@ -141,7 +141,7 @@ const handleLogin = async (req, res) => {
     return res.status(422).json({
       success: false,
       message: 'Fill all the credientials carefully',
-      user: user.rows[0]
+      user: user.rows[0],
     });
   } catch (error) {
     return res.status(500).json({
@@ -168,6 +168,8 @@ const checkUser = async (req, res) => {
       id,
     ]);
 
+    // console.log('hjiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii', user);
+
     if (user.rows.length === 0) {
       return res.status(401).json({
         success: false,
@@ -178,7 +180,7 @@ const checkUser = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: 'user found',
-      user: user.rows[0]
+      user: user.rows[0],
     });
   } catch (error) {
     return res.status(500).json({
