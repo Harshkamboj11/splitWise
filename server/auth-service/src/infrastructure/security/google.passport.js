@@ -16,8 +16,8 @@ passport.use(
         const email = profile.emails[0].value;
         const name = profile.displayName;
         const password = generatePassword(12, false);
-        console.log(password);
 
+        console.log(password);
         console.log(email);
         console.log(name);
         const result = await pool.query(
