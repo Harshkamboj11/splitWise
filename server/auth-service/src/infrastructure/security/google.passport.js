@@ -3,6 +3,7 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import pool from '../database/db.connection.js';
 import 'dotenv/config';
 import generatePassword from 'password-generator';
+import sendConfirmationEmail from '../../utils/notification.client.js';
 
 passport.use(
   new GoogleStrategy(
@@ -17,9 +18,9 @@ passport.use(
         const name = profile.displayName;
         const password = generatePassword(12, false);
 
-        console.log(password);
-        console.log(email);
-        console.log(name);
+        // console.log(password);
+        // console.log(email);
+        // console.log(name);
         const result = await pool.query(
           `SELECT * FROM auth.users WHERE email = $1 `,
           [email]
@@ -37,7 +38,8 @@ passport.use(
           user = insert.rows[0];
         }
 
-        console.log(user);
+        sendConfirmationEmail({ email, name });
+        // console.log(user);
         return done(null, user);
       } catch (error) {
         return done(error, null);
