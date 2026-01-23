@@ -9,38 +9,39 @@ import verifyUser from '../middleware/auth.middleware.js';
 
 router.post('/user/signup', handleSignUp);
 router.post('/user/login', handleLogin);
-router.get('/user/me', verifyUser, checkUser)
+router.get('/user/me', verifyUser, checkUser);
 
 router.get(
-  '/google',
+  '/user/google',
   passport.authenticate('google', {
     scope: ['profile', 'email'],
     session: false,
   })
 );
 
-
 router.get(
-  '/google/callback',
+  '/auth/google/callback',
   passport.authenticate('google', {
     session: false,
     failureRedirect: '/',
   }),
-  (req, res) => {
+  async (req, res) => {
     const user = req.user;
 
-    const token = generateToken({
+    console.log(user)
+    const token = await generateToken({
       userId: user.id,
       email: user.email,
     });
 
+    console.log('heyy lodu , this is me ', token)
     res.cookie('access_token', token, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
       sameSite: 'strict',
     });
 
-    res.redirect('');
+    res.redirect('http://localhost:8080');
   }
 );
 
