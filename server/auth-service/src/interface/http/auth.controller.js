@@ -61,16 +61,27 @@ const handleSignUp = async (req, res) => {
 
     console.log(user);
 
-    console.log('Started sending email');
-    console.log(user.rows[0].name);
-    console.log(user.rows[0].email);
+    // console.log('Started sending email');
+    // console.log(user.rows[0].name);
+    // console.log(user.rows[0].email);
 
     sendConfirmationEmail({
       email: user.rows[0].email,
       name: user.rows[0].name,
     });
 
-    console.log('email sent');
+    const userId = user.rows[0].id;
+    const payload = { userId, email };
+    const token = await generateToken(payload);
+    
+    //token storing in cookies
+    res.cookie('access_token', token, {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      sameSite: 'lax',
+    });
+
+    // console.log('email sent');
     res.status(201).json({
       success: true,
       message: 'User signUp Successfully',
@@ -108,7 +119,7 @@ const handleLogin = async (req, res) => {
       `SELECT id, email, password from auth.users where email = $1`,
       [email]
     );
-    console.log('User logged in successfully', user);
+    // console.log('User logged in successfully', user);
 
     if (user.rows.length === 0) {
       return res.status(404).json({
@@ -126,6 +137,7 @@ const handleLogin = async (req, res) => {
     res.cookie('access_token', token, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      sameSite: 'lax',
     });
 
     console.log('Token stored in cookie');
@@ -153,22 +165,20 @@ const handleLogin = async (req, res) => {
 };
 
 const checkUser = async (req, res) => {
-  const id = req.user.userId;
-  console.log(id);
-
-  if (!id) {
-    return res.status(401).json({
-      success: false,
-      message: 'user not logged in',
-    });
-  }
-
   try {
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'user not logged in',
+      });
+    }
+
+    const id = req.user.userId;
+    console.log('USER ID:', id);
+
     const user = await pool.query(`SELECT * FROM auth.users WHERE id = $1`, [
       id,
     ]);
-
-    // console.log('hjiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii', user);
 
     if (user.rows.length === 0) {
       return res.status(401).json({
@@ -183,6 +193,8 @@ const checkUser = async (req, res) => {
       user: user.rows[0],
     });
   } catch (error) {
+    console.error('CHECK USER ERROR:', error);
+
     return res.status(500).json({
       success: false,
       message: 'something went wrong in authenticating user',
