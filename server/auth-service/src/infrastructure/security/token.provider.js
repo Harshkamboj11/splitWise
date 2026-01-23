@@ -6,7 +6,8 @@ const generateToken = async (payload) => {
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: '168h', //7 days
     });
-    console.log(token);
+    
+    // console.log(token);
     return token;
   } catch (error) {
     console.log('error in generating token', error);
