@@ -127,7 +127,7 @@ const splitAmount = async (req, res) => {
   const userId = req.user.userId;
   const { participantName } = req.params;
 
-  console.log(participantName)
+  console.log(participantName);
   try {
     const ledger = await pool.query(
       `
@@ -182,4 +182,42 @@ const splitAmount = async (req, res) => {
   }
 };
 
-export { addParticipant, addAmount, splitAmount };
+const getParticipants = async (req, res) => {
+  const user = req.user;
+
+  if (!user) {
+    return res.status(401).json({
+      success: false,
+      message: 'unauthorized',
+    });
+  }
+
+  try {
+    const participant = await pool.query(
+      `SELECT * FROM ledger.ledger WHERE user_id = $1`,
+      [user.userId]
+    );
+
+    if (participant.rows.length == 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'user not exists',
+      });
+    }
+    const data = participant.rows[0];
+
+    return res.status(200).json({
+      success: true,
+      message: 'participants fetched successfully',
+      data: data,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'failed to get participants',
+      error: error.message,
+    });
+  }
+};
+
+export { addParticipant, addAmount, splitAmount, getParticipants };
