@@ -59,7 +59,7 @@ const handleSignUp = async (req, res) => {
       [name, email, hashPass]
     );
 
-    console.log(user);
+    // console.log(user);
 
     // console.log('Started sending email');
     // console.log(user.rows[0].name);
@@ -174,7 +174,7 @@ const checkUser = async (req, res) => {
     }
 
     const id = req.user.userId;
-    console.log('USER ID:', id);
+    // console.log('USER ID:', id);
 
     const user = await pool.query(`SELECT * FROM auth.users WHERE id = $1`, [
       id,
@@ -193,7 +193,7 @@ const checkUser = async (req, res) => {
       user: user.rows[0],
     });
   } catch (error) {
-    console.error('CHECK USER ERROR:', error);
+    // console.error('CHECK USER ERROR:', error);
 
     return res.status(500).json({
       success: false,
