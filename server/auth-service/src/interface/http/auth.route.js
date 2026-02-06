@@ -28,13 +28,13 @@ router.get(
   async (req, res) => {
     const user = req.user;
 
-    console.log(user)
+    // console.log(user)
     const token = await generateToken({
       userId: user.id,
       email: user.email,
     });
 
-    console.log('heyy lodu , this is me ', token)
+    // console.log('heyy lodu , this is me ', token)
     res.cookie('access_token', token, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
