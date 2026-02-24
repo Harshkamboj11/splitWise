@@ -12,14 +12,15 @@ const verifyUser = async (req, res, next) => {
       });
     }
 
+    console.log(token)
     const decoded = await jwt.verify(token, process.env.JWT_SECRET);
     req.user = {
       userId: decoded.userId,
       email: decoded.email
     };
-    next();
+    return next();
   } catch (error) {
-    res.status(401).json({
+    return res.status(401).json({
       success: false,
       message: 'Invalid or expired token',
       error: error.message,
